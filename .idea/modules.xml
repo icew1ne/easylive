@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/easylive-admin/easylive-admin.iml" filepath="$PROJECT_DIR$/easylive-admin/easylive-admin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/easylive-common/easylive-common.iml" filepath="$PROJECT_DIR$/easylive-common/easylive-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/easylive-web/easylive-web.iml" filepath="$PROJECT_DIR$/easylive-web/easylive-web.iml" />
+    </modules>
+  </component>
+</project>
