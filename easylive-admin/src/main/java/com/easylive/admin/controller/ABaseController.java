@@ -85,7 +85,7 @@ public class ABaseController {
 
     protected void saveToken2Cookie(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie(Constants.TOKEN_ADMIN,token);
-        cookie.setMaxAge(-1);
+        cookie.setMaxAge(-1);  //成为会话，不保留
         cookie.setPath("/");
         response.addCookie(cookie);
     }
