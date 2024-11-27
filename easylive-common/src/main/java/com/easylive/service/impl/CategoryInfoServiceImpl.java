@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import com.easylive.component.RedisComponent;
 import com.easylive.entity.constants.Constants;
 import com.easylive.exception.BusinessException;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,9 @@ public class CategoryInfoServiceImpl implements CategoryInfoService {
 
 	@Resource
 	private CategoryInfoMapper<CategoryInfo, CategoryInfoQuery> categoryInfoMapper;
+
+	@Resource
+	private RedisComponent redisComponent;
 
 	/**
 	 * 根据条件查询列表
@@ -184,6 +188,7 @@ public class CategoryInfoServiceImpl implements CategoryInfoService {
 		} else {
 			this.categoryInfoMapper.updateByCategoryId(bean, bean.getCategoryId());
 		}
+		save2Reids();
 	}
 
 	@Override
@@ -193,7 +198,7 @@ public class CategoryInfoServiceImpl implements CategoryInfoService {
 		categoryInfoQuery.setCategoryIdOrPCategoryId(categoryId);
 		categoryInfoMapper.deleteByParam(categoryInfoQuery);
 
-		//TODO 刷新缓存
+		save2Reids();
 	}
 
 	@Override
@@ -210,6 +215,14 @@ public class CategoryInfoServiceImpl implements CategoryInfoService {
 		}
 		categoryInfoMapper.updateSortBatch(categoryInfoList);
 
-		//TODO 刷新缓存
+		save2Reids();
+	}
+
+	private void save2Reids() {
+		CategoryInfoQuery query = new CategoryInfoQuery();
+		query.setOrderBy("sort asc");
+		query.setConvert2Three(true);
+		List<CategoryInfo> categoryInfoList = findListByParam(query);
+		redisComponent.saveCategoryList(categoryInfoList);
 	}
 }

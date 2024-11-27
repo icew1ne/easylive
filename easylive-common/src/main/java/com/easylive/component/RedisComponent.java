@@ -2,10 +2,12 @@ package com.easylive.component;
 
 import com.easylive.entity.constants.Constants;
 import com.easylive.entity.dto.TokenUserInfoDto;
+import com.easylive.entity.po.CategoryInfo;
 import com.easylive.redis.RedisUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -53,5 +55,9 @@ public class RedisComponent {
 
     public void cleanToken4Admin(String token) {
         redisUtils.delete(Constants.REDIS_KEY_TOKEN_ADMIN+token);
+    }
+
+    public void saveCategoryList(List<CategoryInfo> categoryInfoList) {
+        redisUtils.set(Constants.REDIS_KEY_CATEGORY_LIST, categoryInfoList);
     }
 }
