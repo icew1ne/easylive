@@ -74,6 +74,9 @@
 			<if test="query.backgroundFuzzy!= null  and query.backgroundFuzzy!=''">
 				 and  background like concat('%', #{query.backgroundFuzzy}, '%')
 			</if>
+		 <if test="query.categoryIdOrPCategoryId!=null">
+			 and c.category_id = #{query.categoryIdOrPCategoryId} or p_category_id = #{query.categoryIdOrPCategoryId}
+		 </if>
 	 </where>
 	</sql>
 
@@ -365,4 +368,16 @@
 		select <include refid="base_column_list" /> from category_info where category_code=#{categoryCode}
 	</select>
 
+	<select id="selectMaxSort" resultType="java.lang.Integer">
+		select ifnull(max(sort), 0)
+		from category_info
+		where p_category_id = #{pCategoryId}
+	</select>
+
+	<update id="updateSortBatch">
+		<foreach collection="categoryInfoList" separator="," item="item">
+			update category_info set sort = #{item.sort} where category_id=#{item.categoryId} and p_category_id =
+			#{item.pCategoryId}
+		</foreach>
+	</update>
 </mapper>

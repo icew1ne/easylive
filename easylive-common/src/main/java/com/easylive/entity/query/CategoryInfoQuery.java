@@ -51,6 +51,25 @@ public class CategoryInfoQuery extends BaseParam {
 	 */
 	private Integer sort;
 
+	private Integer categoryIdOrPCategoryId;
+
+	private Boolean convert2Three;
+
+	public Boolean getConvert2Three() {
+		return convert2Three;
+	}
+
+	public void setConvert2Three(Boolean convert2Three) {
+		this.convert2Three = convert2Three;
+	}
+
+	public Integer getCategoryIdOrPCategoryId() {
+		return categoryIdOrPCategoryId;
+	}
+
+	public void setCategoryIdOrPCategoryId(Integer categoryIdOrPCategoryId) {
+		this.categoryIdOrPCategoryId = categoryIdOrPCategoryId;
+	}
 
 	public void setCategoryId(Integer categoryId){
 		this.categoryId = categoryId;
