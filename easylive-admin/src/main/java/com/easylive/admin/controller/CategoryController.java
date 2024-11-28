@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Locale;
 
 @RestController
-@RequestMapping
+@RequestMapping("/category")
 public class CategoryController extends ABaseController{
 
     @Resource

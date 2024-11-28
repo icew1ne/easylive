@@ -1,6 +1,7 @@
 package com.easylive.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -224,5 +225,14 @@ public class CategoryInfoServiceImpl implements CategoryInfoService {
 		query.setConvert2Three(true);
 		List<CategoryInfo> categoryInfoList = findListByParam(query);
 		redisComponent.saveCategoryList(categoryInfoList);
+	}
+
+	@Override
+	public List<CategoryInfo> getAllCategoryList() {
+		List<CategoryInfo> categoryInfoList = redisComponent.getCategoryList();
+		if (categoryInfoList.isEmpty()) {
+			save2Reids();
+		}
+		return redisComponent.getCategoryList();
 	}
 }

@@ -93,4 +93,6 @@ public interface CategoryInfoService {
 
 	void changeSort(Integer pCategoryId, String categoryIds);
 
+	List<CategoryInfo> getAllCategoryList();
+
 }
