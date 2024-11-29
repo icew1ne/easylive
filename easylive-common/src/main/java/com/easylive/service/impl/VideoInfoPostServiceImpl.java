@@ -1,9 +1,22 @@
 package com.easylive.service.impl;
 
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import com.easylive.component.RedisComponent;
+import com.easylive.entity.constants.Constants;
+import com.easylive.entity.dto.VideoStatusEnum;
+import com.easylive.entity.enums.ResponseCodeEnum;
+import com.easylive.entity.po.VideoInfo;
+import com.easylive.entity.po.VideoInfoFilePost;
+import com.easylive.entity.query.VideoInfoFilePostQuery;
+import com.easylive.exception.BusinessException;
+import com.easylive.mappers.VideoInfoFilePostMapper;
+import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.easylive.entity.enums.PageSize;
@@ -14,6 +27,7 @@ import com.easylive.entity.query.SimplePage;
 import com.easylive.mappers.VideoInfoPostMapper;
 import com.easylive.service.VideoInfoPostService;
 import com.easylive.utils.StringTools;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -24,6 +38,12 @@ public class VideoInfoPostServiceImpl implements VideoInfoPostService {
 
     @Resource
     private VideoInfoPostMapper<VideoInfoPost, VideoInfoPostQuery> videoInfoPostMapper;
+
+    @Resource
+    private RedisComponent redisComponent;
+
+    @Resource
+    private VideoInfoFilePostMapper<VideoInfoFilePost, VideoInfoFilePostQuery> videoInfoFilePostMapper;
 
     /**
      * 根据条件查询列表
@@ -126,5 +146,76 @@ public class VideoInfoPostServiceImpl implements VideoInfoPostService {
     @Override
     public Integer deleteVideoInfoPostByVideoId(String videoId) {
         return this.videoInfoPostMapper.deleteByVideoId(videoId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveVideoInfo(VideoInfoPost videoInfoPost, List<VideoInfoFilePost> uploadFileList) {
+        if (uploadFileList.size() > redisComponent.getSysSettingDto().getVideoPCount()) {
+            throw new BusinessException(ResponseCodeEnum.CODE_600);
+        }
+        if (!StringTools.isEmpty(videoInfoPost.getVideoId())) {
+            VideoInfoPost videoInfoPostDb = this.videoInfoPostMapper.selectByVideoId(videoInfoPost.getVideoId());
+            if (videoInfoPostDb == null) {
+                throw new BusinessException(ResponseCodeEnum.CODE_600);
+            }
+            if (ArrayUtils.contains(new Integer[]{VideoStatusEnum.STATUS0.getStatus(), VideoStatusEnum.STATUS2.getStatus()}, videoInfoPostDb.getStatus())) {
+                throw new BusinessException(ResponseCodeEnum.CODE_600);
+            }
+        }
+        Date curDate = new Date();
+        String videoId = videoInfoPost.getVideoId();
+        List<VideoInfoFilePost> deleteFileList = new ArrayList<>();
+        List<VideoInfoFilePost> addFileList;
+
+        if (StringTools.isEmpty(videoId)) {
+            videoId = StringTools.getRandomString(Constants.LENGTH_10);
+            videoInfoPost.setVideoId(videoId);
+            videoInfoPost.setCreateTime(curDate);
+            videoInfoPost.setLastUpdateTime(curDate);
+            videoInfoPost.setStatus(VideoStatusEnum.STATUS0.getStatus());
+            this.videoInfoPostMapper.insert(videoInfoPost);
+        } else {
+            VideoInfoFilePostQuery fileQuery = new VideoInfoFilePostQuery();
+            fileQuery.setVideoId(videoId);
+            fileQuery.setUserId(videoInfoPost.getUserId());
+            List<VideoInfoFilePost> dbInfoFileList = this.videoInfoFilePostMapper.selectList(fileQuery);
+            Map<String, VideoInfoFilePost> uploadFileMap = uploadFileList.stream().collect(Collectors.toMap(item -> item.getUploadId(), Function.identity(),
+                    (data1, data2) -> data2));
+
+            Boolean updateFileName = false;
+            for (VideoInfoFilePost fileInfo : dbInfoFileList) {
+                VideoInfoFilePost updateFile = uploadFileMap.get(fileInfo.getUploadId());
+                if (updateFile == null) {
+                    deleteFileList.add(fileInfo);
+                } else if (updateFile.getFileName().equals(fileInfo.getFileName())) {
+                    updateFileName = true;
+                }
+            }
+            addFileList = uploadFileList.stream().filter(item -> item.getFileId() == null).collect(Collectors.toList());
+
+            videoInfoPost.setLastUpdateTime(curDate);
+
+            Boolean changeVideoInfo = this.changeVideoInfo(videoInfoPost);
+            if (addFileList != null && !addFileList.isEmpty()) {
+                videoInfoPost.setStatus(VideoStatusEnum.STATUS0.getStatus());
+            } else if (changeVideoInfo || updateFileName) {
+                videoInfoPost.setStatus(VideoStatusEnum.STATUS2.getStatus());
+            }
+            this.videoInfoPostMapper.updateByVideoId(videoInfoPost, videoInfoPost.getVideoId());
+        }
+    }
+
+    private Boolean changeVideoInfo(VideoInfoPost videoInfoPost) {
+        VideoInfoPost dbInfo = this.videoInfoPostMapper.selectByVideoId(videoInfoPost.getVideoId());
+        //标题，封面，标签，简介
+        if (!videoInfoPost.getVideoName().equals(dbInfo.getVideoName())
+                || !videoInfoPost.getVideoCover().equals(dbInfo.getVideoCover())
+                || !videoInfoPost.getTags().equals(dbInfo.getTags())
+                || !videoInfoPost.getIntroduction().equals(dbInfo.getIntroduction())) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

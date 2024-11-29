@@ -2,6 +2,9 @@ package com.easylive.service;
 
 import java.util.List;
 
+import com.easylive.entity.po.VideoInfo;
+import com.easylive.entity.po.VideoInfoFile;
+import com.easylive.entity.po.VideoInfoFilePost;
 import com.easylive.entity.query.VideoInfoPostQuery;
 import com.easylive.entity.po.VideoInfoPost;
 import com.easylive.entity.vo.PaginationResultVO;
@@ -68,5 +71,7 @@ public interface VideoInfoPostService {
      * 根据VideoId删除
      */
     Integer deleteVideoInfoPostByVideoId(String videoId);
+
+    void saveVideoInfo(VideoInfoPost videoInfoPost, List<VideoInfoFilePost> filePostList);
 
 }
