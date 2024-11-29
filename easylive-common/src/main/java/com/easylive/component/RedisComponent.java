@@ -96,16 +96,16 @@ public class RedisComponent {
         return uploadId;
     }
 
-    public UploadingFileDto getUploadVideoFile(String userId, String uploadId) {
-        return (UploadingFileDto) redisUtils.get(Constants.REDIS_KEY_UPLOADING_FILE + userId);
-    }
-
     public SysSettingDto getSysSettingDto() {
         SysSettingDto sysSettingDto = (SysSettingDto) redisUtils.get(Constants.REDIS_KEY_SYS_SETTING);
         if (sysSettingDto == null) {
             sysSettingDto = new SysSettingDto();
         }
         return sysSettingDto;
+    }
+
+    public UploadingFileDto getUploadVideoFile(String userId, String uploadId) {
+        return (UploadingFileDto) redisUtils.get(Constants.REDIS_KEY_UPLOADING_FILE + userId);
     }
 
     public void updateVideoFileInfo(String userId, UploadingFileDto fileDto) {

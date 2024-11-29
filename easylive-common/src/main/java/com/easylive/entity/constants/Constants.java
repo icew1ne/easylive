@@ -59,4 +59,14 @@ public class Constants {
     public static final String REDIS_KEY_FILE_DEL = REDIS_KEY_PREFIX + "file:list:del";
 
     public static final String REDIS_KEY_QUEUE_TRANSFER = REDIS_KEY_PREFIX + "queue:transfer:";
+
+    public static final String TEMP_VIDEO_NAME = "/temp.mp4";
+
+    public static final String VIDEO_CODE_HEVC = "hevc";
+
+    public static final String VIDEO_CODE_TEMP_FILE_SUFFIX = "_temp";
+
+    public static final String TS_NAME = "index.ts";
+
+    public static final String M3U8_NAME = "index.m3u8";
 }
