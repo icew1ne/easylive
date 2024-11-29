@@ -1,4 +1,4 @@
-package com.easylive.entity.dto;
+package com.easylive.entity.enums;
 
 public enum VideoStatusEnum {
     STATUS0(0, "转码中"),

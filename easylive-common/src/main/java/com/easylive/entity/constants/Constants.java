@@ -6,9 +6,13 @@ public class Constants {
 
     public static final Integer ZERO = 0;
 
+    public static final Integer LENGTH_2 = 2;
+
     public static final Integer LENGTH_10 =10;
 
     public static final Integer LENGTH_15 = 15;
+
+    public static final Integer LENGTH_20 = 20;
 
     public static final Integer LENGTH_30 = 30;
 
@@ -50,4 +54,9 @@ public class Constants {
 
     //系统设置
     public static final String REDIS_KEY_SYS_SETTING = REDIS_KEY_PREFIX + "sys:setting:";
+
+    //删除文件的结合
+    public static final String REDIS_KEY_FILE_DEL = REDIS_KEY_PREFIX + "file:list:del";
+
+    public static final String REDIS_KEY_QUEUE_TRANSFER = REDIS_KEY_PREFIX + "queue:transfer:";
 }

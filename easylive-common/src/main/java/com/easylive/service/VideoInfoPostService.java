@@ -74,4 +74,5 @@ public interface VideoInfoPostService {
 
     void saveVideoInfo(VideoInfoPost videoInfoPost, List<VideoInfoFilePost> filePostList);
 
+    void transferVideoFile(VideoInfoFilePost videoInfoFilePost);
 }

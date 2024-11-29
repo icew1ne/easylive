@@ -7,6 +7,7 @@ import com.easylive.entity.dto.TokenUserInfoDto;
 import com.easylive.entity.dto.UploadingFileDto;
 import com.easylive.entity.enums.DateTimePatternEnum;
 import com.easylive.entity.po.CategoryInfo;
+import com.easylive.entity.po.VideoInfoFilePost;
 import com.easylive.redis.RedisUtils;
 import com.easylive.utils.DateUtil;
 import com.easylive.utils.StringTools;
@@ -113,5 +114,17 @@ public class RedisComponent {
 
     public void delVideoFileInfo(String userId, String uploadId) {
         redisUtils.delete(Constants.REDIS_KEY_UPLOADING_FILE + userId + uploadId);
+    }
+
+    public void addFile2DelQueue(String videoId, List<String> filePathList) {
+        redisUtils.lpushAll(Constants.REDIS_KEY_FILE_DEL + videoId, filePathList, Constants.REDIS_KEY_EXPIRES_ONE_DAY * 7);
+    }
+
+    public void addFile2TransferQueue(List<VideoInfoFilePost> addFileLIst) {
+        redisUtils.lpushAll(Constants.REDIS_KEY_QUEUE_TRANSFER, addFileLIst, 0);
+    }
+
+    public VideoInfoFilePost getFileFromTransferQueue() {
+        return (VideoInfoFilePost) redisUtils.rpop(Constants.REDIS_KEY_QUEUE_TRANSFER);
     }
 }

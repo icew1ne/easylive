@@ -8,18 +8,14 @@ import javax.annotation.Resource;
 
 import com.easylive.component.RedisComponent;
 import com.easylive.entity.constants.Constants;
-import com.easylive.entity.dto.VideoStatusEnum;
-import com.easylive.entity.enums.ResponseCodeEnum;
-import com.easylive.entity.po.VideoInfo;
+import com.easylive.entity.enums.*;
 import com.easylive.entity.po.VideoInfoFilePost;
 import com.easylive.entity.query.VideoInfoFilePostQuery;
 import com.easylive.exception.BusinessException;
 import com.easylive.mappers.VideoInfoFilePostMapper;
 import org.apache.commons.lang3.ArrayUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.easylive.entity.enums.PageSize;
 import com.easylive.entity.query.VideoInfoPostQuery;
 import com.easylive.entity.po.VideoInfoPost;
 import com.easylive.entity.vo.PaginationResultVO;
@@ -166,7 +162,7 @@ public class VideoInfoPostServiceImpl implements VideoInfoPostService {
         Date curDate = new Date();
         String videoId = videoInfoPost.getVideoId();
         List<VideoInfoFilePost> deleteFileList = new ArrayList<>();
-        List<VideoInfoFilePost> addFileList;
+        List<VideoInfoFilePost> addFileList = uploadFileList;
 
         if (StringTools.isEmpty(videoId)) {
             videoId = StringTools.getRandomString(Constants.LENGTH_10);
@@ -204,6 +200,37 @@ public class VideoInfoPostServiceImpl implements VideoInfoPostService {
             }
             this.videoInfoPostMapper.updateByVideoId(videoInfoPost, videoInfoPost.getVideoId());
         }
+
+        if (!deleteFileList.isEmpty()) {
+            List<String> delFileList = deleteFileList.stream().map(item -> item.getFileId()).collect(Collectors.toList());
+            this.videoInfoFilePostMapper.deleteBatchByFileId(delFileList, videoInfoPost.getUserId());
+
+            List<String> delFilePathList = deleteFileList.stream().map(item -> item.getFilePath()).collect(Collectors.toList());
+
+            redisComponent.addFile2DelQueue(videoId, delFilePathList);
+        }
+
+        Integer index = 1;
+        for (VideoInfoFilePost videoInfoFile : uploadFileList) {
+            videoInfoFile.setFileIndex(index++);
+            videoInfoFile.setVideoId(videoId);
+            videoInfoFile.setUserId(videoInfoPost.getUserId());
+            if (videoInfoFile.getFileId() == null) {
+                videoInfoFile.setFileId(StringTools.getRandomString(Constants.LENGTH_20));
+                videoInfoFile.setUpdateType(VideoFileUpdateTypeEnum.UPDATE.getStatus());
+                videoInfoFile.setTransferResult(VideoFileTransferResultEnum.TRANSFER.getStatus());
+            }
+        }
+        this.videoInfoFilePostMapper.insertOrUpdateBatch(uploadFileList);
+
+        if (addFileList != null && !addFileList.isEmpty()) {
+            for (VideoInfoFilePost file : addFileList) {
+                file.setUserId(videoInfoPost.getUserId());
+                file.setVideoId(videoId);
+            }
+            redisComponent.addFile2TransferQueue(addFileList);
+        }
+
     }
 
     private Boolean changeVideoInfo(VideoInfoPost videoInfoPost) {
@@ -217,5 +244,10 @@ public class VideoInfoPostServiceImpl implements VideoInfoPostService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public void transferVideoFile(VideoInfoFilePost videoInfoFilePost) {
+
     }
 }
