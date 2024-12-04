@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,18 +28,18 @@ public class ExecuteQueueTask {
     @PostConstruct
     public void consumTrasnferFIleQueue() {
         executorService.execute(() -> {
-//            while (true) {
-//                try {
-//                    VideoInfoFilePost videoInfoFile = redisComponent.getFileFromTransferQueue();
-//                    if (videoInfoFile==null){
-//                        Thread.sleep(1500);
-//                        continue;
-//                    }
-//                    videoInfoPostService.transferVideoFile(videoInfoFile);
-//                }catch (Exception e) {
-//                    log.error("获取转码文件队列信息失败",e);
-//                }
-//            }
+            while (true) {
+                try {
+                    VideoInfoFilePost videoInfoFile = redisComponent.getFileFromTransferQueue();
+                    if (videoInfoFile == null) {
+                        Thread.sleep(1500);
+                        continue;
+                    }
+                    videoInfoPostService.transferVideoFile(videoInfoFile);
+                } catch (Exception e) {
+                    log.error("获取转码文件队列信息失败", e);
+                }
+            }
         });
     }
 

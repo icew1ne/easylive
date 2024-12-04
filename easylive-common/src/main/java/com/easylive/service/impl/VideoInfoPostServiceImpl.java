@@ -274,7 +274,11 @@ public class VideoInfoPostServiceImpl implements VideoInfoPostService {
             String targetFilePath = appConfig.getProjectFolder() + Constants.FILE_FOLDER + Constants.FILE_VIDEO + fileDto.getFilePath();
             File targetFile = new File(targetFilePath);
 
-            FileUtils.copyDirectory(targetFile, targetFile);
+            if (!targetFile.exists()) {
+                targetFile.mkdirs();
+            }
+
+            FileUtils.copyDirectory(tempFile, targetFile);
 
             //删除临时目录
             FileUtils.forceDelete(tempFile);
