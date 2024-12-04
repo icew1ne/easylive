@@ -141,7 +141,8 @@
                 and interaction like concat('%', #{query.interactionFuzzy}, '%')
             </if>
             <if test="query.excludeStatusArray!=null">
-                and v.status not in(<foreach collection="query.excludeStatusArray" separator="," item="item">#{item}</foreach>)
+                and v.status not in(<foreach collection="query.excludeStatusArray" separator="," item="item">
+                #{item}</foreach>)
             </if>
         </where>
     </sql>
